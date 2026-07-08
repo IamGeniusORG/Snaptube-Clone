@@ -1,4 +1,4 @@
-<h1 align="center">High-Concurrency Throttled Media Processor 🚀</h1>
+<h1 align="center">Snaptube Clone 🚀</h1>
 
 <p align="center">
   <i>A production-grade, highly parallel mass-downloader built from scratch in Go.</i>
