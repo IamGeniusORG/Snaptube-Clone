@@ -18,3 +18,7 @@ downloads/
 *.part
 *.ytdl
 *.tmp
+
+# Browser cookies
+*cookies.txt
+cookies.txt

@@ -135,7 +135,7 @@ func main() {
 	flag.Parse()
 
 	fmt.Println("===================================================")
-	fmt.Println("🚀 Starting High-Concurrency Media Processor v2.0")
+	fmt.Println("🚀 Starting Snaptube Clone v2.0")
 	fmt.Printf("⚙️  Concurrency Limit: %d workers\n", *workersPtr)
 	fmt.Println("===================================================")
 
@@ -186,18 +186,35 @@ func main() {
 	for i, rawURL := range jobURLs {
 		cleanURL := strings.TrimSpace(rawURL)
 
-		// FEATURE: Dynamic File Extensions
+		// FEATURE: Dynamic File Extensions & Categorization
 		// Automatically extract the correct file extension from the URL (e.g. .jpg, .png, .mp4)
 		parsedURL, err := url.Parse(cleanURL)
 		ext := ".data" // fallback extension if the URL doesn't have one
 		if err == nil && path.Ext(parsedURL.Path) != "" {
-			ext = path.Ext(parsedURL.Path)
+			ext = strings.ToLower(path.Ext(parsedURL.Path))
 		}
+
+		subfolder := "others"
+		switch ext {
+		case ".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv":
+			subfolder = "videos"
+		case ".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a":
+			subfolder = "audio"
+		case ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".tiff":
+			subfolder = "images"
+		case ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv":
+			subfolder = "documents"
+		case ".zip", ".rar", ".7z", ".tar", ".gz":
+			subfolder = "archives"
+		}
+
+		targetDir := filepath.Join(outDir, subfolder)
+		os.MkdirAll(targetDir, os.ModePerm)
 
 		jobsChan <- Job{
 			ID:       i + 1,
 			URL:      cleanURL,
-			DestPath: filepath.Join(outDir, fmt.Sprintf("download_%d%s", i+1, ext)),
+			DestPath: filepath.Join(targetDir, fmt.Sprintf("download_%d%s", i+1, ext)),
 		}
 	}
 	close(jobsChan)
