@@ -58,9 +58,15 @@ go run main.go -workers 5 -urls "http://example.com/image.png, http://example.co
 
 Because this project includes a special `yt-dlp.conf` file, you don't need to type any complicated flags. It will automatically bypass YouTube's blockers, merge high-quality audio and video using FFmpeg, and sort the final file into `downloads/mp4/` or `downloads/mp3/`.
 
-**Download a Video (Best Quality):**
+**Download a Video (Standard 360p - Highest Stability):**
 ```bash
 yt-dlp "https://youtube.com/watch?v=example"
+```
+
+**Download a Video (Flawless 1080p - Bypass Mode):**
+If your IP is flagged by YouTube (403/429 errors), use our custom built-in Python script which bypasses the blocks to fetch crystal-clear 1080p video:
+```bash
+python download_1080.py "https://youtube.com/watch?v=example"
 ```
 
 **Download Audio Only (MP3):**

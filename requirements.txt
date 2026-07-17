@@ -2,3 +2,4 @@
 Go (Golang)
 yt-dlp
 FFmpeg
+Python 3 (with `pip install pytubefix`)
