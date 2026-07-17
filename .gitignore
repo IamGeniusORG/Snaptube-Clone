@@ -22,3 +22,9 @@ downloads/
 # Browser cookies
 *cookies.txt
 cookies.txt
+
+# Test folders
+Tests/
+tests/
+Test/
+test/
