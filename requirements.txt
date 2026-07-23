@@ -1,5 +1,5 @@
 # Required Software
 Go (Golang)
-yt-dlp
+yt-dlp (Required for non-YouTube sites)
 FFmpeg
 Python 3 (with `pip install pytubefix`)

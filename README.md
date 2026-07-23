@@ -1,75 +1,70 @@
 <h1 align="center">Snaptube Clone 🚀</h1>
 
 <p align="center">
-  <i>A fast, easy-to-use mass-downloader for internet media!</i>
+  <i>A fast, universal, adaptive media downloader powered by Python!</i>
 </p>
 
 ---
 
 ## 📖 Overview
 
-**Snaptube Clone** is a powerful command-line tool that lets you download multiple videos, images, or documents at the same time without crashing your internet. 
+**Snaptube Clone** is a powerful command-line tool that lets you download media from anywhere on the internet. 
 
-Whether you want to download a batch of files directly or download videos from sites like YouTube, this tool handles it all quickly and safely. It also features a built-in smart sorter that automatically organizes your downloaded files into perfectly categorized folders!
+Instead of relying on heavy third-party tools that get easily blocked, this project uses a single, highly optimized **Python script** (`downloader.py`). It automatically detects your native screen resolution and perfectly fetches the highest-quality version of the media that fits your display—whether it's a YouTube video, a direct image link, or anything else!
 
 ---
 
 ## ✨ Features
 
-- **🚀 Fast Downloads:** Downloads multiple files at the same time.
-- **🚦 Safe Limits:** Automatically limits downloads so it doesn't slow down your home network.
-- **📁 Smart File Sorting:** Automatically sorts downloaded files into specific folders (`downloads/videos/`, `downloads/audio/`, `downloads/mp4/`, etc.) based on their formats!
-- **▶️ Ultimate YouTube Bypass:** Uses a special `yt-dlp.conf` file to pretend to be an Android phone, completely bypassing YouTube's bot blockers and DRM locks. 
-- **🛑 Safe Cancel:** If you press Ctrl+C, it stops cleanly without leaving broken/junk files on your computer.
-- **📊 Live Progress:** Shows you exactly how much of each file has been downloaded.
+- **💡 Universal Downloader:** A single Python script handles ANY media URL (YouTube, images, PDFs, archives).
+- **📺 Adaptive Resolution:** Automatically detects your display height (e.g., 1080p, 1440p, 4k) and guarantees the downloaded media perfectly matches your screen!
+- **▶️ Ultimate YouTube Bypass:** Uses a specialized Android VR spoofing technique inside Python to completely bypass YouTube's 403 and 429 bot blockers. No more errors!
+- **📁 Smart File Sorting:** Automatically organizes your downloaded files into a `downloads/mp4/` directory with clean, resolution-tagged filenames.
+- **🛑 Safe & Clean:** Cleans up all temporary video and audio tracks automatically after securely merging them with FFmpeg.
 
 ---
 
 ## ⚙️ Installation
 
-Make sure you have installed the required software listed in `requirements.txt` (Go, yt-dlp, and FFmpeg).
+1. **Install System Dependencies:**
+   Make sure you have **FFmpeg** and **yt-dlp** installed on your system.
+   - On Windows, you can install them via Chocolatey: `choco install ffmpeg yt-dlp`
 
-Then, download the project:
-```bash
-git clone https://github.com/IamGeniusORG/Snaptube-Clone.git
-cd Snaptube-Clone
-```
+2. **Install Python Dependencies:**
+   Install the required libraries (specifically `pytubefix` for our YouTube blocker-bypassing engine):
+   ```bash
+   pip install -r requirements.txt
+   ```
 
----
-
-## 🚀 How to Use (Direct Links)
-*Use this for direct links to images, PDFs, or standard video files.*
-
-**1. Basic Usage (Test files):**
-```bash
-go run main.go
-```
-
-**2. Download Your Own Links:**
-```bash
-go run main.go -workers 5 -urls "http://example.com/image.png, http://example.com/video.mp4"
-```
-*Your files will be automatically sorted into `downloads/images/`, `downloads/videos/`, etc., based on their extension!*
+3. **Download the Project:**
+   ```bash
+   git clone https://github.com/IamGeniusORG/Snaptube-Clone.git
+   cd Snaptube-Clone
+   ```
 
 ---
 
-## 🎥 How to Use (YouTube & Streaming Sites)
-*Use this for YouTube, Twitter, Reddit, etc.*
+## 🚀 How to Use
 
-Because this project includes a special `yt-dlp.conf` file, you don't need to type any complicated flags. It will automatically bypass YouTube's blockers, merge high-quality audio and video using FFmpeg, and sort the final file into `downloads/mp4/` or `downloads/mp3/`.
+To download absolutely any media from the internet, simply run the Python script and pass the URL in quotes:
 
-**Download a Video (Standard 360p - Highest Stability):**
+**Download a YouTube Video (Auto-Adapts to your Screen):**
 ```bash
-yt-dlp "https://youtube.com/watch?v=example"
+python downloader.py "https://youtube.com/watch?v=example"
 ```
+*(The script will read your monitor's resolution, bypass YouTube's blockers using Python, and grab the highest quality possible up to your native display limits!)*
 
-**Download a Video (Flawless 1080p - Bypass Mode):**
-If your IP is flagged by YouTube (403/429 errors), use our custom built-in Python script which bypasses the blocks to fetch crystal-clear 1080p video:
+**Download from Twitter, Reddit, or other streaming sites:**
 ```bash
-python download_1080.py "https://youtube.com/watch?v=example"
+python downloader.py "https://twitter.com/..."
 ```
+*(The Python script will automatically detect that it's not a YouTube link and perfectly hand the URL over to `yt-dlp` to extract the video!)*
 
-**Download Audio Only (MP3):**
-```bash
-yt-dlp -x --audio-format mp3 "https://youtube.com/watch?v=example"
-```
+### 📁 Where do the files go?
+Your perfectly downloaded media will be automatically saved in the auto-generated `downloads/mp4/` folder (or `downloads/others/` for non-YouTube files) with the resolution clearly labeled in the filename!
+
+---
+
+## 📚 Technical Notes
+- **Hybrid System:** This project uses a hybrid downloading system. Because YouTube heavily flags `yt-dlp` IP addresses, all YouTube links are securely routed through a custom Python `pytubefix` engine that mimics an Android VR headset to completely bypass 403 and 429 blockers. For all other websites (Twitter, Reddit, Vimeo), the Python script automatically routes the traffic back to `yt-dlp` since they don't have the same strict IP bans!
+- **Go Batch Downloader (Optional):** We have left the original `main.go` file in the repo in case you ever want to run mass-concurrent batch downloads for direct links. You can run it via `go run main.go -urls "link1,link2"`.
