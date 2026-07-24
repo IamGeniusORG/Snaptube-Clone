@@ -36,6 +36,7 @@ Moving beyond legacy downloaders that get IP-banned, this engine uses a cutting-
 ## ✨ Features
 
 - **💡 Universal Extraction Core:** A single, intelligent Python interface (`downloader.py`) natively handles YouTube, Twitter, Reddit, standard file links, and virtually any media platform.
+- **🎵 Audio-Only Mode:** Easily rip pristine MP3s from any video (music, podcasts, lectures) without wasting storage on the video track.
 - **📺 Hardware-Adaptive Resolution:** Utilizing cross-platform GUI detection, the engine reads your exact display height (e.g., 1080p, 1440p) and guarantees the downloaded media flawlessly matches your monitor's limits.
 - **▶️ Android VR Spoofing:** To bypass YouTube's aggressive 403/429 bot blockers, the engine securely routes connections through a simulated Android VR environment via `pytubefix`.
 - **🎥 Studio-Grade Re-encoding:** Every video downloaded is aggressively passed through an FFmpeg normalization pipeline. We enforce a **perfect 16:9 widescreen ratio**, lock the framerate to a buttery smooth **30fps**, and lock the bitrate at **10,000 kbps (10M)**.
@@ -98,6 +99,13 @@ python downloader.py "https://twitter.com/..."
 python3 downloader.py "https://twitter.com/..."
 ```
 *(The engine will instantly detect non-YouTube platforms and hand the URL to the yt-dlp extraction core before applying the FFmpeg studio formatting!)*
+
+**Audio-Only Mode (Rip MP3s):**
+To instantly download and extract just the audio from ANY video (YouTube, Reddit, etc.), simply add `--audio` to the end of your command:
+```bash
+python downloader.py "URL_HERE" --audio
+```
+*(The engine will download the high-quality audio track and forcefully convert it to a pristine MP3 file via FFmpeg!)*
 
 ---
 
