@@ -15,7 +15,7 @@
 ---
 
 ## 📋 Table of Contents
-- [📖 Overview](#-overview)
+- [📖 About the Project](#-about-the-project)
 - [✨ Features](#-features)
 - [⚙️ Installation](#️-installation)
   - [Windows](#windows)
@@ -29,11 +29,13 @@
 
 ---
 
-## 📖 Overview
+## 📖 About the Project
 
-**Snaptube Clone v3.0** is a next-generation command-line tool built to autonomously extract and standardize media from anywhere on the internet. 
+**Snaptube Clone v3.0** isn't just a media downloader—it is an autonomous, high-performance extraction and rendering engine built to rip, standardize, and archive media from anywhere on the internet.
 
-Moving beyond legacy single-threaded downloaders, this system utilizes a cutting-edge **Hybrid Concurrency Engine**. A high-performance Go orchestrator natively manages a scalable pool of Python extraction bots. It automatically analyzes your hardware, scales video resolution, and surgically extracts the absolute highest-quality stream available before engaging a localized FFmpeg pipeline to aggressively upscale, format, and re-encode every frame to perfection.
+Designed for raw speed and complete hardware adaptability, this system abandons legacy single-threaded downloading methods. Instead, it utilizes a **Hybrid Concurrency Architecture** where a lightning-fast **Go Orchestrator** commands a scalable swarm of **Python Extraction Bots**. 
+
+Whether you are pulling from YouTube, Reddit, or Twitter, the engine actively analyzes your specific display resolution, bypasses bot-detection firewalls using Android VR spoofing, and dynamically routes traffic to ensure unblockable downloads. Once extracted, the raw media is instantly shoved through a multi-threaded **FFmpeg Studio Pipeline** that aggressively upscales, balances, and re-encodes every single frame to flawless, synchronized perfection.
 
 ---
 
