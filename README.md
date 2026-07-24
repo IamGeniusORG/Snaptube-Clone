@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/Python-3.14-blue.svg?style=flat-square&logo=python" alt="Python">
   <img src="https://img.shields.io/badge/Go-1.22-cyan.svg?style=flat-square&logo=go" alt="Go">
   <img src="https://img.shields.io/badge/FFmpeg-Ready-red.svg?style=flat-square&logo=ffmpeg" alt="FFmpeg">
-  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-lightgrey.svg?style=flat-square" alt="Platform">
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg?style=flat-square" alt="Platform">
 </p>
 
 ---
@@ -20,6 +20,7 @@
 - [⚙️ Installation](#️-installation)
   - [Windows](#windows)
   - [macOS](#macos)
+  - [Linux](#linux)
 - [🚀 How to Use](#-how-to-use)
   - [Batch Downloading (Go)](#batch-downloading-go-orchestrator)
   - [Single Downloads (Python)](#single-downloads-python-direct)
@@ -70,7 +71,19 @@ Moving beyond legacy single-threaded downloaders, this system utilizes a cutting
 2. **Install Python Libraries:**
    *(macOS strictly uses python3)*
    ```bash
-   pip3 install pytubefix
+   pip3 install -r requirements.txt
+   ```
+
+### Linux
+1. **Install System Dependencies (Ubuntu/Debian):**
+   ```bash
+   sudo apt update
+   sudo apt install ffmpeg golang-go
+   ```
+   *(We recommend installing yt-dlp via pip on Linux to ensure it stays up to date)*
+2. **Install Python Libraries:**
+   ```bash
+   pip3 install -r requirements.txt yt-dlp
    ```
 
 3. **Download the Project:**
@@ -103,7 +116,7 @@ To test a single link without the Go Orchestrator, pass your URL in quotes direc
 # Windows
 python downloader.py "https://youtube.com/watch?v=example"
 
-# macOS
+# macOS / Linux
 python3 downloader.py "https://youtube.com/watch?v=example"
 ```
 *(Add `--audio` to the end of the Python command for an MP3 rip).*
