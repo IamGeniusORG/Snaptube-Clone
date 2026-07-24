@@ -1,16 +1,22 @@
 import os
 import sys
 import subprocess
-import tkinter as tk
+try:
+    import tkinter as tk
+    TK_AVAILABLE = True
+except ImportError:
+    TK_AVAILABLE = False
 from pytubefix import YouTube
 
 # ---------------------------------------------------------------------------
-# Helper: Detect primary monitor height (cross‑platform via tkinter)
+# Helper: Detect primary monitor height (cross-platform via tkinter)
 # ---------------------------------------------------------------------------
 def get_screen_height():
     """Return the height (in pixels) of the primary display.
-    Falls back to 1080 if detection fails.
+    Falls back to 1080 if detection fails or tkinter is unavailable.
     """
+    if not TK_AVAILABLE:
+        return 1080
     try:
         root = tk.Tk()
         root.withdraw()

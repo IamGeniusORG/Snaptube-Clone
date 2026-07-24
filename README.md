@@ -1,39 +1,71 @@
 <h1 align="center">Snaptube Clone 🚀</h1>
 
 <p align="center">
-  <i>A fast, universal, adaptive media downloader powered by Python!</i>
+  <strong>Next-Generation Universal Media Extraction Engine</strong><br>
+  <i>Powered by Python, FFmpeg, and Adaptive Display Intelligence.</i>
 </p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.14-blue.svg?style=flat-square&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/FFmpeg-Ready-red.svg?style=flat-square&logo=ffmpeg" alt="FFmpeg">
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS-lightgrey.svg?style=flat-square" alt="Platform">
+</p>
+
+---
+
+## 📋 Table of Contents
+- [📖 Overview](#-overview)
+- [✨ Features](#-features)
+- [⚙️ Installation](#️-installation)
+  - [Windows](#windows)
+  - [macOS](#macos)
+- [🚀 How to Use](#-how-to-use)
+- [📂 File Sorting](#-file-sorting)
+- [📚 Technical Architecture](#-technical-architecture)
 
 ---
 
 ## 📖 Overview
 
-**Snaptube Clone** is a powerful command-line tool that lets you download media from anywhere on the internet. 
+**Snaptube Clone** is a next-generation command-line tool built to autonomously extract and standardize media from anywhere on the internet. 
 
-Instead of relying on heavy third-party tools that get easily blocked, this project uses a single, highly optimized **Python script** (`downloader.py`). It automatically detects your native screen resolution and perfectly fetches the highest-quality version of the media that fits your display—whether it's a YouTube video, a direct image link, or anything else!
+Moving beyond legacy downloaders that get IP-banned, this engine uses a cutting-edge **Hybrid System**. It automatically analyzes your hardware's native screen resolution and surgically extracts the absolute highest-quality stream available. From there, it engages a localized FFmpeg pipeline to aggressively upscale, format, and re-encode every frame to perfection. 
 
 ---
 
 ## ✨ Features
 
-- **💡 Universal Downloader:** A single Python script handles ANY media URL (YouTube, images, PDFs, archives).
-- **📺 Adaptive Resolution:** Automatically detects your display height (e.g., 1080p, 1440p, 4k) and guarantees the downloaded media perfectly matches your screen!
-- **▶️ Ultimate YouTube Bypass:** Uses a specialized Android VR spoofing technique inside Python to completely bypass YouTube's 403 and 429 bot blockers. No more errors!
-- **📁 Smart File Sorting:** Automatically organizes your downloaded files into a `downloads/mp4/` directory with clean, resolution-tagged filenames.
-- **🛑 Safe & Clean:** Cleans up all temporary video and audio tracks automatically after securely merging them with FFmpeg.
+- **💡 Universal Extraction Core:** A single, intelligent Python interface (`downloader.py`) natively handles YouTube, Twitter, Reddit, standard file links, and virtually any media platform.
+- **📺 Hardware-Adaptive Resolution:** Utilizing cross-platform GUI detection, the engine reads your exact display height (e.g., 1080p, 1440p) and guarantees the downloaded media flawlessly matches your monitor's limits.
+- **▶️ Android VR Spoofing:** To bypass YouTube's aggressive 403/429 bot blockers, the engine securely routes connections through a simulated Android VR environment via `pytubefix`.
+- **🎥 Studio-Grade Re-encoding:** Every video downloaded is aggressively passed through an FFmpeg normalization pipeline. We enforce a **perfect 16:9 widescreen ratio**, lock the framerate to a buttery smooth **30fps**, and lock the bitrate at **10,000 kbps (10M)**.
+- **📁 Autonomous Sorting:** Drops all final files into a unified `downloads/mp4/` directory, while securely wiping raw files from hidden temporary folders.
 
 ---
 
 ## ⚙️ Installation
 
+### Windows
 1. **Install System Dependencies:**
-   Make sure you have **FFmpeg** and **yt-dlp** installed on your system.
-   - On Windows, you can install them via Chocolatey: `choco install ffmpeg yt-dlp`
-
-2. **Install Python Dependencies:**
-   Install the required libraries (specifically `pytubefix` for our YouTube blocker-bypassing engine):
+   Ensure you have **FFmpeg** and **yt-dlp** installed. You can quickly install them via an admin PowerShell:
+   ```powershell
+   choco install ffmpeg yt-dlp
+   ```
+2. **Install Python Libraries:**
    ```bash
    pip install -r requirements.txt
+   ```
+
+### macOS
+1. **Install System Dependencies:**
+   Use Homebrew to install the required extraction tools:
+   ```bash
+   brew install ffmpeg yt-dlp
+   ```
+2. **Install Python Libraries:**
+   *(macOS strictly uses python3)*
+   ```bash
+   pip3 install pytubefix
    ```
 
 3. **Download the Project:**
@@ -46,25 +78,36 @@ Instead of relying on heavy third-party tools that get easily blocked, this proj
 
 ## 🚀 How to Use
 
-To download absolutely any media from the internet, simply run the Python script and pass the URL in quotes:
+To download absolutely any media, invoke the engine and pass your URL in quotes:
 
-**Download a YouTube Video (Auto-Adapts to your Screen):**
+**Download a YouTube Video:**
 ```bash
+# Windows
 python downloader.py "https://youtube.com/watch?v=example"
-```
-*(The script will read your monitor's resolution, bypass YouTube's blockers using Python, and grab the highest quality possible up to your native display limits!)*
 
-**Download from Twitter, Reddit, or other streaming sites:**
+# macOS
+python3 downloader.py "https://youtube.com/watch?v=example"
+```
+
+**Download from Social Media (Twitter, Reddit, etc.):**
 ```bash
+# Windows
 python downloader.py "https://twitter.com/..."
-```
-*(The Python script will automatically detect that it's not a YouTube link and perfectly hand the URL over to `yt-dlp` to extract the video!)*
 
-### 📁 Where do the files go?
-Your perfectly downloaded media will be automatically saved in the auto-generated `downloads/mp4/` folder (or `downloads/others/` for non-YouTube files) with the resolution clearly labeled in the filename!
+# macOS
+python3 downloader.py "https://twitter.com/..."
+```
+*(The engine will instantly detect non-YouTube platforms and hand the URL to the yt-dlp extraction core before applying the FFmpeg studio formatting!)*
 
 ---
 
-## 📚 Technical Notes
-- **Hybrid System:** This project uses a hybrid downloading system. Because YouTube heavily flags `yt-dlp` IP addresses, all YouTube links are securely routed through a custom Python `pytubefix` engine that mimics an Android VR headset to completely bypass 403 and 429 blockers. For all other websites (Twitter, Reddit, Vimeo), the Python script automatically routes the traffic back to `yt-dlp` since they don't have the same strict IP bans!
-- **Go Batch Downloader (Optional):** We have left the original `main.go` file in the repo in case you ever want to run mass-concurrent batch downloads for direct links. You can run it via `go run main.go -urls "link1,link2"`.
+## 📂 File Sorting
+
+Your standardized media will be autonomously compiled and saved in the generated `downloads/mp4/` folder. The engine natively labels the exact resolution directly in the output filename (e.g., `MyVideo [1920x1080].mp4`), so you know you are getting pristine quality.
+
+---
+
+## 📚 Technical Architecture
+- **Hybrid Network Design:** YouTube heavily flags raw `yt-dlp` connections. To solve this, all YouTube links are routed through our Python `pytubefix` engine. All other domains (Twitter, Reddit, Vimeo) are automatically routed back to the `yt-dlp` extractor since they lack YouTube's strict IP bans.
+- **Safe macOS Parsing:** The script actively checks for the presence of macOS UI toolkits (`python-tk`). If missing, it dynamically bypasses GUI detection and defaults to standard 1080p, preventing any traceback crashes.
+- **Go Batch Downloader (Legacy):** The original `main.go` file remains in the repository architecture for high-concurrency batch processing of direct file links. Execute via `go run main.go -urls "link1,link2"`.
