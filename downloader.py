@@ -37,24 +37,42 @@ if len(urls) < 1:
     print('Usage: python downloader.py "URL" [--audio]')
     sys.exit(1)
 
+import uuid
+unique_id = uuid.uuid4().hex[:8]
+
+temp_dir = os.path.join(os.getcwd(), 'downloads', f'temp_dl_{unique_id}')
+os.makedirs(temp_dir, exist_ok=True)
+
 url = urls[0]
 print('🔍 Detecting native screen resolution...')
 max_height = get_screen_height()
 print(f'📺 Native display height detected: {max_height}p')
 
 # ---------------------------------------------------------------------------
-# YouTube handling – use pytubefix for fine‑grained control
+# Platform Routing & Fallback Logic
 # ---------------------------------------------------------------------------
-if 'youtube.com' in url or 'youtu.be' in url:
-    print('🚀 Using pytubefix for YouTube download (adaptive to screen)')
-    yt = YouTube(url, client='ANDROID_VR')
+is_youtube = 'youtube.com' in url or 'youtu.be' in url
+force_ytdlp = False
+
+if is_youtube:
+    print('🚀 Initializing pytubefix YouTube extraction engine...')
+    try:
+        yt = YouTube(url, client='ANDROID_VR')
+        _ = yt.title  # Trigger YouTube bot detection check
+    except Exception as e:
+        print(f'⚠️ YouTube aggressively blocked pytubefix (Bot Detection).')
+        print('🔄 Automatically falling back to yt-dlp extraction engine...')
+        force_ytdlp = True
+
+if is_youtube and not force_ytdlp:
+    print('🚀 pytubefix successfully bypassed blockers! (adaptive to screen)')
     print(f'Title: {yt.title}')
 
     if audio_only:
         print('🎵 Audio-only mode detected!')
         audio_stream = yt.streams.get_audio_only('mp4')
         print('Downloading audio...')
-        audio_file = audio_stream.download(output_path='.', filename='audio_temp.mp4')
+        audio_file = audio_stream.download(output_path=temp_dir, filename=f'audio_temp_{unique_id}.mp4')
         
         safe_title = ''.join(c for c in yt.title if c.isalnum() or c in (' ', '-', '_')).rstrip()
         out_dir = os.path.join(os.getcwd(), 'downloads', 'mp3')
@@ -69,6 +87,7 @@ if 'youtube.com' in url or 'youtu.be' in url:
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
         
         os.remove(audio_file)
+        os.rmdir(temp_dir)
         print(f'✅ Done! Audio saved to: {final_path}')
     else:
         # Choose the best video stream that does not exceed the screen height
@@ -89,9 +108,9 @@ if 'youtube.com' in url or 'youtu.be' in url:
 
         # Download temporary files
         print(f'Downloading video ({video_stream.resolution})...')
-        video_file = video_stream.download(output_path='.', filename='video_temp.mp4')
+        video_file = video_stream.download(output_path=temp_dir, filename=f'video_temp_{unique_id}.mp4')
         print('Downloading audio...')
-        audio_file = audio_stream.download(output_path='.', filename='audio_temp.mp4')
+        audio_file = audio_stream.download(output_path=temp_dir, filename=f'audio_temp_{unique_id}.mp4')
 
         # Build safe output filename
         safe_title = ''.join(c for c in yt.title if c.isalnum() or c in (' ', '-', '_')).rstrip()
@@ -108,6 +127,8 @@ if 'youtube.com' in url or 'youtu.be' in url:
         subprocess.run([
             'ffmpeg', '-y', '-i', video_file, '-i', audio_file,
             '-c:v', 'libx264',
+            '-preset', 'ultrafast',
+            '-threads', '2',
             '-b:v', '10M',
             '-maxrate', '10M',
             '-bufsize', '20M',
@@ -121,12 +142,13 @@ if 'youtube.com' in url or 'youtu.be' in url:
         # Cleanup temporary files
         os.remove(video_file)
         os.remove(audio_file)
+        os.rmdir(temp_dir)
         print(f'✅ Done! File saved to: {final_path}')
 else:
     # ---------------------------------------------------------------------------
-    # Non-YouTube URLs - delegate to yt-dlp to handle complex sites (Twitter, Reddit, etc.)
+    # yt-dlp Fallback / Non-YouTube Engine
     # ---------------------------------------------------------------------------
-    print('🌐 Non-YouTube URL - using yt-dlp to extract and download media')
+    print('🌐 Routing to yt-dlp to extract and download media...')
     
     if audio_only:
         print('🎵 Audio-only mode detected!')
@@ -150,8 +172,7 @@ else:
         vf_scale = f"scale={target_width}:{max_height}:force_original_aspect_ratio=decrease,pad={target_width}:{max_height}:(ow-iw)/2:(oh-ih)/2"
         
         # We output to a temporary folder first so we can find the file easily
-        temp_dir = os.path.join(os.getcwd(), 'downloads', 'temp_dl')
-        os.makedirs(temp_dir, exist_ok=True)
+        # (temp_dir is already created at the top of the script)
         out_template = os.path.join(temp_dir, '%(title)s.%(ext)s')
         
         # Define yt-dlp format respecting the screen height
@@ -183,6 +204,8 @@ else:
                 subprocess.run([
                     'ffmpeg', '-y', '-i', dl_file,
                     '-c:v', 'libx264',
+                    '-preset', 'ultrafast',
+                    '-threads', '2',
                     '-b:v', '10M',
                     '-maxrate', '10M',
                     '-bufsize', '20M',
@@ -195,6 +218,7 @@ else:
                 
                 # Cleanup
                 os.remove(dl_file)
+                os.rmdir(temp_dir)
                 print(f'✅ Done! File standardized and saved to: {final_path}')
         except Exception as e:
             print(f"Failed to download or encode using yt-dlp: {e}")

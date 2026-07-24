@@ -4,24 +4,20 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
 	"os"
+	"os/exec"
 	"os/signal"
-	"path"
-	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"syscall"
-	"time"
 )
 
-// Job represents a single media download task.
+// Job represents a single Python download task.
 type Job struct {
-	ID       int
-	URL      string
-	DestPath string
+	ID    int
+	URL   string
+	Audio bool
 }
 
 // Result represents the outcome of a job.
@@ -31,30 +27,7 @@ type Result struct {
 	Err   error
 }
 
-// ProgressWriter tracks download completion.
-type ProgressWriter struct {
-	Total      uint64
-	Downloaded uint64
-	JobID      int
-	FileName   string
-	lastReport uint64
-}
-
-// Write captures the stream and prints progress.
-func (pw *ProgressWriter) Write(p []byte) (int, error) {
-	n := len(p)
-	pw.Downloaded += uint64(n)
-
-	percentage := float64(pw.Downloaded) / float64(pw.Total) * 100
-
-	if pw.Downloaded-pw.lastReport >= pw.Total/10 || pw.Downloaded == pw.Total {
-		fmt.Printf("   [Job %d] %s: %.0f%% complete\n", pw.JobID, pw.FileName, percentage)
-		pw.lastReport = pw.Downloaded
-	}
-	return n, nil
-}
-
-// worker processes downloads and returns results to the resultsChan.
+// worker processes URLs by calling the Python engine and returns results to the resultsChan.
 func worker(ctx context.Context, id int, jobs <-chan Job, results chan<- Result, wg *sync.WaitGroup) {
 	defer wg.Done()
 
@@ -67,98 +40,53 @@ func worker(ctx context.Context, id int, jobs <-chan Job, results chan<- Result,
 		default:
 		}
 
-		fmt.Printf("-> Worker %d starting Job %d\n", id, job.ID)
-		err := downloadFile(ctx, job)
+		fmt.Printf("-> Worker %d starting extraction for: %s\n", id, job.URL)
+		
+		// Build the python command
+		args := []string{"downloader.py", job.URL}
+		if job.Audio {
+			args = append(args, "--audio")
+		}
+
+		pythonBin := "python"
+		if runtime.GOOS == "darwin" || runtime.GOOS == "linux" {
+			pythonBin = "python3"
+		}
+		cmd := exec.CommandContext(ctx, pythonBin, args...)
+		// Force Python to use UTF-8 encoding so emojis don't crash the script when piped through Go on Windows
+		cmd.Env = append(os.Environ(), "PYTHONIOENCODING=utf-8")
+		// We can pipe the python script's output to standard output so the user sees progress
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		err := cmd.Run()
 		results <- Result{JobID: job.ID, URL: job.URL, Err: err}
 	}
 }
 
-func downloadFile(ctx context.Context, job Job) error {
-	// FEATURE: Temp Files
-	// We download to a .tmp file first. If it gets interrupted, we don't end up with corrupted files.
-	tempPath := job.DestPath + ".tmp"
-	out, err := os.Create(tempPath)
-	if err != nil {
-		return fmt.Errorf("failed to create file: %w", err)
-	}
-	
-	// Ensure we close the file when the function exits
-	defer out.Close()
-
-	// Use http.NewRequestWithContext to make the network request cancellable!
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, job.URL, nil)
-	if err != nil {
-		return err
-	}
-
-	client := http.Client{Timeout: 60 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("network error: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad status: %s", resp.Status)
-	}
-
-	if resp.ContentLength <= 0 {
-		_, err = io.Copy(out, resp.Body)
-	} else {
-		pw := &ProgressWriter{
-			Total:    uint64(resp.ContentLength),
-			JobID:    job.ID,
-			FileName: filepath.Base(job.DestPath),
-		}
-		reader := io.TeeReader(resp.Body, pw)
-		_, err = io.Copy(out, reader)
-	}
-
-	// Close the file explicitly before renaming
-	out.Close()
-
-	if err != nil {
-		// Cleanup the partial temp file if download failed or was cancelled
-		os.Remove(tempPath)
-		return err
-	}
-
-	// FEATURE: Safe renaming
-	// Only when download is 100% successful do we rename it from .tmp to its final .zip name
-	return os.Rename(tempPath, job.DestPath)
-}
-
 func main() {
-	// --- FEATURE 1: Command-Line Flags ---
-	workersPtr := flag.Int("workers", 3, "Number of concurrent download workers")
+	// --- Command-Line Flags ---
+	workersPtr := flag.Int("workers", 2, "Number of concurrent Python engines to run")
 	urlsPtr := flag.String("urls", "", "Comma-separated list of URLs to download")
+	audioPtr := flag.Bool("audio", false, "Extract audio only (MP3)")
 	flag.Parse()
 
 	fmt.Println("===================================================")
-	fmt.Println("🚀 Starting Snaptube Clone v2.0")
-	fmt.Printf("⚙️  Concurrency Limit: %d workers\n", *workersPtr)
+	fmt.Println("🚀 Starting Snaptube Clone Batch Manager v3.0")
+	fmt.Printf("⚙️  Concurrency Limit: %d active engines\n", *workersPtr)
+	if *audioPtr {
+		fmt.Println("🎵 Mode: Audio-Only (MP3)")
+	}
 	fmt.Println("===================================================")
 
-	// Create output folder
-	outDir := "downloads"
-	os.MkdirAll(outDir, os.ModePerm)
-
-	// Build jobs list from CLI or use default defaults
-	var jobURLs []string
-	if *urlsPtr != "" {
-		jobURLs = strings.Split(*urlsPtr, ",")
-	} else {
-		jobURLs = []string{
-			"http://speedtest.tele2.net/10MB.zip",
-			"http://speedtest.tele2.net/10MB.zip",
-			"http://speedtest.tele2.net/10MB.zip",
-			"http://speedtest.tele2.net/10MB.zip",
-			"http://speedtest.tele2.net/10MB.zip",
-		}
+	if *urlsPtr == "" {
+		fmt.Println("❌ Error: No URLs provided. Use -urls \"link1,link2\"")
+		os.Exit(1)
 	}
 
-	// --- FEATURE 2: Graceful Shutdown (Context) ---
-	// Create a context that can be cancelled
+	jobURLs := strings.Split(*urlsPtr, ",")
+
+	// --- Graceful Shutdown (Context) ---
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -167,8 +95,8 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-sigChan
-		fmt.Println("\n⚠️  Ctrl+C pressed! Safely cancelling active downloads and cleaning up partial files...")
-		cancel() // This sends a cancellation signal to ALL network requests automatically!
+		fmt.Println("\n⚠️  Ctrl+C pressed! Safely killing active Python engines...")
+		cancel() // This instantly kills all running exec.CommandContext processes!
 	}()
 
 	// Channels
@@ -185,58 +113,34 @@ func main() {
 	// Distribute jobs
 	for i, rawURL := range jobURLs {
 		cleanURL := strings.TrimSpace(rawURL)
-
-		// FEATURE: Dynamic File Extensions & Categorization
-		// Automatically extract the correct file extension from the URL (e.g. .jpg, .png, .mp4)
-		parsedURL, err := url.Parse(cleanURL)
-		ext := ".data" // fallback extension if the URL doesn't have one
-		if err == nil && path.Ext(parsedURL.Path) != "" {
-			ext = strings.ToLower(path.Ext(parsedURL.Path))
+		if cleanURL == "" {
+			continue
 		}
-
-		subfolder := "others"
-		switch ext {
-		case ".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv":
-			subfolder = "videos"
-		case ".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a":
-			subfolder = "audio"
-		case ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".tiff":
-			subfolder = "images"
-		case ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".csv":
-			subfolder = "documents"
-		case ".zip", ".rar", ".7z", ".tar", ".gz":
-			subfolder = "archives"
-		}
-
-		targetDir := filepath.Join(outDir, subfolder)
-		os.MkdirAll(targetDir, os.ModePerm)
-
 		jobsChan <- Job{
-			ID:       i + 1,
-			URL:      cleanURL,
-			DestPath: filepath.Join(targetDir, fmt.Sprintf("download_%d%s", i+1, ext)),
+			ID:    i + 1,
+			URL:   cleanURL,
+			Audio: *audioPtr,
 		}
 	}
 	close(jobsChan)
 
-	// Run WaitGroup Wait in background so main thread can process results
+	// Wait for workers in background
 	go func() {
 		wg.Wait()
-		close(resultsChan) // Close results once all workers clock out
+		close(resultsChan)
 	}()
 
-	// --- FEATURE 3: Fan-In Results Aggregation ---
+	// --- Fan-In Results Aggregation ---
 	successCount := 0
 	failCount := 0
 
-	// This loop blocks and reads results as they come in from the workers
 	for res := range resultsChan {
 		if res.Err != nil {
 			failCount++
 			fmt.Printf("❌ Job %d Failed: %v\n", res.JobID, res.Err)
 		} else {
 			successCount++
-			fmt.Printf("✅ Job %d Completed Successfully\n", res.JobID)
+			fmt.Printf("✅ Job %d Successfully Processed by Python Engine\n", res.JobID)
 		}
 	}
 
