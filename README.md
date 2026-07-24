@@ -39,6 +39,7 @@ Moving beyond legacy single-threaded downloaders, this system utilizes a cutting
 ## ✨ Features
 
 - **⚡ High-Concurrency Batch Orchestrator:** Use the `main.go` engine to securely run up to 15 Python instances simultaneously. The Go script acts as a master traffic controller, safely managing your CPU load without freezing your computer.
+- **📺 Hardware-Adaptive Resolution:** Utilizing cross-platform GUI detection, the engine actively reads your exact display height (e.g., 1080p on your current laptop). It guarantees the downloaded media flawlessly synchronizes to your specific monitor's limits. If you run this on a 1440p or 4K MacBook, the script automatically scales and formats the extraction target to perfectly match that device!
 - **💡 Universal Extraction Core:** A single, intelligent Python interface natively handles YouTube, Twitter, Reddit, standard file links, and virtually any media platform.
 - **🎵 Audio-Only Mode:** Easily rip pristine MP3s from any video (music, podcasts, lectures) without wasting storage on the video track.
 - **🛡️ UUID Sandbox Isolation:** Every single active worker generates a cryptographically unique `temp_dl_UUID` directory for raw downloads, ensuring files never clash, even under massive concurrency loads. The root directory remains spotless.
@@ -111,7 +112,7 @@ python3 downloader.py "https://youtube.com/watch?v=example"
 
 ## 📂 File Sorting
 
-Your standardized media will be autonomously compiled and saved in the generated `downloads/mp4/` or `downloads/mp3/` folders. The engine natively labels the exact resolution directly in the output filename (e.g., `MyVideo [1920x1080].mp4`), so you know you are getting pristine quality.
+Your standardized media will be autonomously compiled and saved in the generated `downloads/mp4/` or `downloads/mp3/` folders. The engine natively labels the exact resolution directly in the output filename (e.g., `MyVideo [1920x1080].mp4` if downloaded on your current laptop, or `MyVideo [2560x1440].mp4` if downloaded on a 1440p display). Every single device gets its own perfectly synchronized resolution.
 
 ---
 
